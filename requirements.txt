@@ -1,6 +1,8 @@
-streamlit
 pandas
+streamlit
 matplotlib
-wordcloud
-Pillow
+seaborn
 nltk
+wordcloud
+openpyxl
+plotly
