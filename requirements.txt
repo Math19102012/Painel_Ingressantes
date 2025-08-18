@@ -1,0 +1,12 @@
+streamlit
+pandas
+numpy
+plotly
+altair
+openpyxl
+scikit-learn
+nltk
+wordcloud
+matplotlib
+spacy
+Pillow
