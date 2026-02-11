@@ -62,11 +62,11 @@ st.sidebar.markdown("Use os filtros abaixo para segmentar os dados.")
 curso = st.sidebar.selectbox("Selecione o Curso", ["Todos"] + list(dados["Qual o seu Curso?"].dropna().unique()))
 
 # Filtro de período letivo (com opção de 'Todos')
-periodo = st.sidebar.selectbox("Selecione o Período Letivo", ["Todos"] + list(dados["Qual é o seu período?"].dropna().unique()))
+periodo = st.sidebar.selectbox("Selecione o Turno", ["Todos"] + list(dados["Qual é o seu período?"].dropna().unique()))
 
 # Filtro de semestre (com opção de 'Todos')
 semestres_disponiveis = sorted(dados["Semestre"].dropna().unique(), reverse=True)
-semestre = st.sidebar.selectbox("Selecione o Semestre", ["Todos"] + semestres_disponiveis)
+semestre = st.sidebar.selectbox("Selecione o Período Letivo", ["Todos"] + semestres_disponiveis)
 
 
 # 📄 Aplicar filtros no dataframe
@@ -123,3 +123,4 @@ grafico_motivos_escolha(df_filtrado)
 grafico_expectativas_curso(df_filtrado)
 grafico_objetivos_profissionais(df_filtrado)
 grafico_recomendacao(df_filtrado)
+
