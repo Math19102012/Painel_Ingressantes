@@ -18,72 +18,25 @@ def carregar_sharepoint(
     site_path: str,
     list_name: str,
 ) -> pd.DataFrame:
+    client = _client_from_secrets()
+    site_id = client.get_site_id(hostname, site_path)
+    list_id = client.get_list_id_by_name(site_id, list_name)
 
-    try:
-        client = _client_from_secrets()
+    rows = client.fetch_list_items(site_id, list_id)
+    df = pd.DataFrame(rows)
+    df = normalize_columns(df)
 
-        # 🔗 Conecta no SharePoint
-        site_id = client.get_site_id(hostname, site_path)
-        list_id = client.get_list_id_by_name(site_id, list_name)
+    # Garante colunas esperadas pelo app
+    for col in ["Hora de início", "Qual o seu Curso?", "Qual é o seu período?"]:
+        if col not in df.columns:
+            df[col] = pd.NA
 
-        # 📥 Busca dados
-        rows = client.fetch_list_items(site_id, list_id)
+    # Converte datas
+    if "Hora de início" in df.columns:
+        df["Hora de início"] = pd.to_datetime(df["Hora de início"], errors="coerce", dayfirst=True)
 
-        if not rows:
-            st.warning("Nenhum dado retornado da lista do SharePoint.")
-            return pd.DataFrame()
-
-        df = pd.DataFrame(rows)
-
-        # 🔍 DEBUG: ver colunas brutas
-        print("COLUNAS BRUTAS DO SHAREPOINT:")
-        print(df.columns.tolist())
-
-        # 🔄 Normaliza colunas
-        df = normalize_columns(df)
-
-        # 🔍 DEBUG: ver colunas após tratamento
-        print("COLUNAS NORMALIZADAS:")
-        print(df.columns.tolist())
-
-        # 🧱 Garante colunas mínimas (evita quebra do app)
-        colunas_esperadas = [
-            "Hora de início",
-            "Qual o seu Curso?",
-            "Qual é o seu período?",
-            "Renda Individual Mensal (R$)",
-            "Renda Familiar Mensal (R$)",
-            "Cargo",
-        ]
-
-        for col in colunas_esperadas:
-            if col not in df.columns:
-                df[col] = pd.NA
-
-        # 📅 Converte datas
-        if "Hora de início" in df.columns:
-            df["Hora de início"] = pd.to_datetime(
-                df["Hora de início"],
-                errors="coerce",
-                dayfirst=True
-            )
-
-        return df
-
-    except Exception as e:
-        st.error(f"Erro ao carregar dados do SharePoint: {e}")
-        return pd.DataFrame()
+    return df
 
 
 def carregar_csv(caminho: str = "data/ingressantes.csv") -> pd.DataFrame:
-    try:
-        df = pd.read_csv(caminho)
-
-        print("COLUNAS CSV:")
-        print(df.columns.tolist())
-
-        return df
-
-    except Exception as e:
-        st.error(f"Erro ao carregar CSV: {e}")
-        return pd.DataFrame()
+    return pd.read_csv(caminho)
