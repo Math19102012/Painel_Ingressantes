@@ -241,68 +241,53 @@ def grafico_subcategorias(df: pd.DataFrame, categoria_desejada: str):
         ax.text(v + 0.5, i, f"{v:.1f}%", va='center')
     st.pyplot(fig)
 
-def grafico_influencia_fatores(df: pd.DataFrame):
-    st.subheader("✨ Fatores que Influenciaram a Escolha pela FECAP")
+def grafico_influencia_fatores(df):
+    import streamlit as st
+    import pandas as pd
+    import plotly.graph_objects as go
 
-    colunas_influencia = [
-        "Proximidade da residência",
-        "Proximidade do trabalho",
-        "Recomendações de amigos",
-        "Recomendações de alunos e ex-alunos",
-        "Recomendações de familiares",
-        "Recomendações de Professores de Ensino Médio-Básico",
-        "Recomendações de Profissionais de Mercado",
-        "Informações no Facebook",
-        "Informações no Instagram",
-        "Informações no Youtube",
-        "Informações no Linkedin",
-        "Corpo Docente (Professores da FECAP)",
-        "Matriz Curricular do Curso",
-        "Resultados no ENADE-MEC",
-        "Resultados em Rankings (ex: Guia da Faculdade)",
-        "Preço do Curso",
-        "Instalações e Infraestrutura",
-        "Serviços de atendimento e recepção",
-        "Prestígio do Curso",
-        "Prestígio da Marca FECAP"
-    ]
+    if df.empty:
+        st.warning("Sem dados para exibir.")
+        return
 
-    escala = [
-        "Influenciou muito negativamente",
-        "Influenciou negativamente",
-        "Neutro",
-        "Influenciou positivamente",
-        "Influenciou muito positivamente"
-    ]
+    # 🔍 DEBUG
+    print("COLUNAS DISPONÍVEIS NO DF:")
+    print(df.columns.tolist())
 
-    dados_plot = pd.DataFrame()
+    # 👉 Ajuste aqui conforme nome real da coluna no SharePoint
+    coluna_fator = "Fatores que influenciaram sua escolha pela FECAP"
+    coluna_resposta = "Grau de influência"
 
-    for coluna in colunas_influencia:
-        if coluna in df.columns:
-            contagem = df[coluna].value_counts().reindex(escala, fill_value=0)
-            dados_plot[coluna] = contagem
+    if coluna_fator not in df.columns or coluna_resposta not in df.columns:
+        st.error("Colunas de influência não encontradas.")
+        return
 
-    dados_plot = dados_plot.T
-    dados_plot.index.name = "Fator"
-    dados_plot.reset_index(inplace=True)
+    # 📊 Agrupa dados corretamente
+    dados_plot = (
+        df.groupby([coluna_fator, coluna_resposta])
+        .size()
+        .unstack(fill_value=0)
+    )
+
+    dados_plot = dados_plot.reset_index().rename(columns={coluna_fator: "Fator"})
 
     fig = go.Figure()
-    for cat in escala:
-        fig.add_trace(go.Bar(
-            y=dados_plot["Fator"],
-            x=dados_plot[cat],
-            name=cat,
-            orientation="h"
-        ))
+
+    for col in dados_plot.columns[1:]:
+        fig.add_trace(
+            go.Bar(
+                y=dados_plot["Fator"],
+                x=dados_plot[col],
+                name=col,
+                orientation="h"
+            )
+        )
 
     fig.update_layout(
         barmode="stack",
-        colorway=["#8B0000", "#FF9999", "#A9A9A9", "#90EE90", "#006400"],
-        xaxis_title="Número de Respostas",
-        yaxis_title="Fatores",
-        title="Influência dos Fatores na Escolha pela FECAP",
-        height=800,
-        legend_title="Tipo de Influência"
+        title="Fatores que Influenciaram a Escolha",
+        xaxis_title="Quantidade",
+        yaxis_title="Fator"
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -741,4 +726,5 @@ def grafico_recomendacao(df: pd.DataFrame):
         ax.text(i, v + 1, str(v), ha='center', va='bottom', fontsize=10)
 
     # Mostrar o gráfico no Streamlit
+
     st.pyplot(fig)
