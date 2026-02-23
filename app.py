@@ -28,7 +28,7 @@ st.title("📊 Análise Perfil dos Ingressantes")
 # 📥 Carregar dados do CSV local
 try:
     dados = carregar_dados_local()
-    st.success("Base carregada do arquivo local ✅")
+    st.success("Base carregada ✅")
 except Exception as erro:
     st.error(f"Erro ao carregar os dados: {erro}")
     st.stop()
@@ -132,3 +132,4 @@ grafico_motivos_escolha(df_filtrado)
 grafico_expectativas_curso(df_filtrado)
 grafico_objetivos_profissionais(df_filtrado)
 grafico_recomendacao(df_filtrado)
+
